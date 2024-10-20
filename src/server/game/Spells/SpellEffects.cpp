@@ -941,7 +941,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         if (spellInfo->NeedsToBeTriggeredByCaster(m_spellInfo) && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
 
-        if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
+        if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION && m_targets.HasDst())
             targets.SetDst(m_targets);
 
         targets.SetUnitTarget(m_caster);
@@ -3561,7 +3561,7 @@ void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)
     Player* player = m_caster->ToPlayer();
     if (player && player->GetRoleForGroup() == ROLES_TANK)
     {
-        if (auto currentVictim = unitTarget->getThreatManager().getCurrentVictim())
+        if (auto currentVictim = unitTarget->GetThreatManager().getCurrentVictim())
         {
             const uint32 spellVengeance = 132365;
 
@@ -3580,18 +3580,18 @@ void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)
     }
 
     // Also use this effect to set the taunter's threat to the taunted creature's highest value
-    if (unitTarget->getThreatManager().getCurrentVictim())
+    if (unitTarget->GetThreatManager().getCurrentVictim())
     {
-        float myThreat = unitTarget->getThreatManager().getThreat(m_caster);
-        float itsThreat = unitTarget->getThreatManager().getCurrentVictim()->getThreat();
+        float myThreat = unitTarget->GetThreatManager().getThreat(m_caster);
+        float itsThreat = unitTarget->GetThreatManager().getCurrentVictim()->getThreat();
         if (itsThreat > myThreat)
-            unitTarget->getThreatManager().addThreat(m_caster, itsThreat - myThreat);
+            unitTarget->GetThreatManager().addThreat(m_caster, itsThreat - myThreat);
     }
 
     //Set aggro victim to caster
-    if (!unitTarget->getThreatManager().getOnlineContainer().empty())
-        if (HostileReference* forcedVictim = unitTarget->getThreatManager().getOnlineContainer().getReferenceByTarget(m_caster))
-            unitTarget->getThreatManager().setCurrentVictim(forcedVictim);
+    if (!unitTarget->GetThreatManager().getOnlineContainer().empty())
+        if (HostileReference* forcedVictim = unitTarget->GetThreatManager().getOnlineContainer().getReferenceByTarget(m_caster))
+            unitTarget->GetThreatManager().setCurrentVictim(forcedVictim);
 
     if ((unitTarget->ToCreature()->IsAIEnabled && !unitTarget->ToCreature()->HasReactState(REACT_PASSIVE)) || (unitTarget->IsPetGuardianStuff() && unitTarget->GetCharmerOrOwnerGUID().IsPlayer()))
         unitTarget->ToCreature()->AI()->AttackStart(m_caster);
@@ -5847,7 +5847,7 @@ void Spell::EffectModifyThreatPercent(SpellEffIndex /*effIndex*/)
     if (!unitTarget)
         return;
 
-    unitTarget->getThreatManager().modifyThreatPercent(m_caster, damage);
+    unitTarget->GetThreatManager().modifyThreatPercent(m_caster, damage);
 }
 
 void Spell::EffectTransmitted(SpellEffIndex effIndex)
@@ -6952,7 +6952,7 @@ void Spell::EffectResurrectWithAura(SpellEffIndex effIndex)
 
     Player* target = unitTarget ? unitTarget->ToPlayer() : nullptr;
     if (!unitTarget && corpseTarget)
-        target = ObjectAccessor::FindPlayer(corpseTarget->GetOwnerGUID());
+        target = ObjectAccessor::FindConnectedPlayer(corpseTarget->GetOwnerGUID());
 
     if (!target)
         return;
@@ -6965,8 +6965,8 @@ void Spell::EffectResurrectWithAura(SpellEffIndex effIndex)
     // Shitty workaround but still better than unsafe access
 //     TaskMgr::Default()->ScheduleInvocation([playerGuid, casterGuid, effectValue, spellInfo, effIndex]
 //     {
-//         Player* player = ObjectAccessor::FindPlayerInOrOutOfWorld(playerGuid);
-//         Player* caster = ObjectAccessor::FindPlayerInOrOutOfWorld(casterGuid);
+//         Player* player = ObjectAccessor::FindConnectedPlayer(playerGuid);
+//         Player* caster = ObjectAccessor::FindConnectedPlayer(casterGuid);
 //         if (!player || !caster)
 //             return;
 
@@ -6989,8 +6989,8 @@ void Spell::EffectResurrectWithAura(SpellEffIndex effIndex)
 // #pragma warning(pop)
 //     });
 
-        Player* player = ObjectAccessor::FindPlayer(playerGuid);
-        Player* caster = ObjectAccessor::FindPlayer(casterGuid);
+        Player* player = ObjectAccessor::FindConnectedPlayer(playerGuid);
+        Player* caster = ObjectAccessor::FindConnectedPlayer(casterGuid);
         if (!player || !caster)
             return;
 

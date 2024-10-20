@@ -10599,26 +10599,8 @@ uint32 Player::GetXPRestBonus(uint32 xp)
 
 void Player::SetBindPoint(ObjectGuid guid)
 {
-    WorldPacket data(SMSG_BINDER_CONFIRM, 9);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
-    data.FlushBits();
-
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    GetSession()->SendPacket(&data);
+    WorldPackets::Misc::BinderConfirm packet(guid);
+    SendDirectMessage(packet.Write());
 }
 
 void Player::SendTalentWipeConfirm(ObjectGuid guid, bool resetType)
@@ -11038,7 +11020,7 @@ uint32 Player::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipIte
     return count;
 }
 
-Item* Player::GetItemByGuid(uint64 guid) const
+Item* Player::GetItemByGuid(ObjectGuid guid) const
 {
     for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
@@ -17676,13 +17658,18 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
         {
             QuestStatusData& q_status = m_QuestStatus[questId];
 
-            if (!q_status.Explored)
+            // Dont complete failed quest
+            if (!q_status.Explored && q_status.Status != QUEST_STATUS_FAILED)
             {
                 q_status.Explored = true;
                 m_QuestStatusSave[questId] = true;
+                SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
+                // m_QuestStatusSave[questId] = QUEST_DEFAULT_SAVE_TYPE;
+                // Todo 
+
+                SendQuestComplete(questId);
             }
         }
-
         if (CanCompleteQuest(questId))
             CompleteQuest(questId);
     }
@@ -18143,6 +18130,16 @@ void Player::SendQuestComplete(Quest const* quest)
         WorldPackets::Quest::QuestUpdateComplete packet;
         packet.QuestID = quest->GetQuestId();
         SendDirectMessage(packet.Write());
+    }
+}
+
+void Player::SendQuestComplete(uint32 questId) const
+{
+    if (questId)
+    {
+        WorldPackets::Quest::QuestUpdateComplete data;
+        data.QuestID = questId;
+        SendDirectMessage(data.Write());
     }
 }
 
@@ -20750,7 +20747,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         Player* leader = this;
         ObjectGuid leaderGuid = GetGroup() ? GetGroup()->GetLeaderGUID() : GetGUID();
         if (leaderGuid != GetGUID())
-            leader = ObjectAccessor::FindPlayer(leaderGuid);
+            leader = ObjectAccessor::FindConnectedPlayer(leaderGuid);
 
         if (ar->achievement)
             if (!leader || !leader->HasAchieved(ar->achievement))

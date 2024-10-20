@@ -1449,7 +1449,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
     uint8 FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) const;
     uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = NULL) const;
     uint32 GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipItem = NULL) const;
-    Item* GetItemByGuid(uint64 guid) const;
+    Item* GetItemByGuid(ObjectGuid guid) const;
     Item* GetItemByEntry(uint32 entry) const;
     Item* GetItemByPos(uint16 pos) const;
     Item* GetItemByPos(uint8 bag, uint8 slot) const;
@@ -1767,6 +1767,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
     bool IsQuestObjectiveComplete(Quest const* quest, QuestObjective const& objective) const;
 
     void SendQuestComplete(Quest const* quest);
+    void SendQuestComplete(uint32 questId) const;
     void SendQuestReward(Quest const* quest, uint32 XP);
     void SendQuestFailed(uint32 questId, InventoryResult reason = EQUIP_ERR_OK);
     void SendQuestTimerFailed(uint32 questId);
