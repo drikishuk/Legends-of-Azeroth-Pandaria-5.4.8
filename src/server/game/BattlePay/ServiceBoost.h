@@ -22,13 +22,15 @@ enum CharBoostMisc
 {
     // Items
     ITEM_HEARTHSTONE                         = 6948,
-    ITEM_EMBERSILK_BAG                       = 54443,
+    ITEM_SMALL_BROWN_SATCHEL = 4498,
     ITEM_LEMON_FLAVOUR_PUDING                = 108920,
+    ITEM_MELON_JUICE = 1205,
+    ITEM_DWARVEN_MILD = 422,
     // Spells
-    SPELL_SWIFT_PURPLE_WIND_RIDER            = 32297,
-    SPELL_SWIFT_PURPLE_GRYPGON               = 32292,
+    SPELL_STRIPED_NIGHTSABER = 10793,
+    SPELL_BLACK_SKELETAL_HORSE = 64977,
     // Misc
-    MAP_VALE_OF_ETERNAL_BLOSSOMS             = 870,
+    MAP_STORMS_REACH = 1200,
     MAIL_CHARRACTER_BOOST_EQUIPED_ITEMS_BODY = 403,
     // Profession spells
     SPELL_FIRST_AID                          = 110406,
@@ -47,16 +49,19 @@ enum CharBoostMisc
     SPELL_LEATHERWORKING                     = 110423,
     SPELL_ENCHANTING                         = 110400,
     // Riding spells
-    SPELL_ARTISAN_RIDING                     = 34091,
+    SPELL_JOURNEYMAN_RIDING = 34091,
     SPELL_COLD_WHEATHER_FLYING               = 54197,
     SPELL_FLIGHT_MASTER_LICENSE              = 90267,
     SPELL_WISDOM_OF_FOUR_WINDS               = 115913,
+    // Armour Spells
+    SPELL_LEARN_PLATE_ARMOUR = 750,
+    SPELL_LEARN_MAIL_ARMOUR = 8738,
 };
 
 float const startPosition[2][4] =
 {
-    { 1605.908f, 921.2222f, 470.6227f, 0.124413f }, // horde
-    { 880.6965f, 296.6945f, 503.1162f, 3.779655f }  // alliance
+    { 10158.9f, 9696.93f, 20.6442f, 3.07326f }, // horde
+    { 10158.9f, 9696.93f, 20.6442f, 3.07326f }  // alliance
 };
 
 struct CharacterBoostData

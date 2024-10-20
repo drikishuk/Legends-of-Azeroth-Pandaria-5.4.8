@@ -77,10 +77,19 @@ public:
     {
         // optional
         char* path_number = NULL;
+        char* delay_str = NULL;
         uint32 pathid = 0;
+        uint32 delay = 0;
 
         if (*args)
             path_number = strtok((char*)args, " ");
+        
+        //BenDev:
+        delay_str = strtok(NULL, " ");
+        // if a delay is provided, convert it to an integer
+        if (delay_str)
+            delay = atoi(delay_str); // convert the delay string to a uint32 value
+
 
         uint32 point = 0;
         Creature* target = handler->getSelectedCreature();
@@ -129,6 +138,9 @@ public:
         stmt->setFloat(2, player->GetPositionX());
         stmt->setFloat(3, player->GetPositionY());
         stmt->setFloat(4, player->GetPositionZ());
+        // BenDev: Add Waypoint delay params
+
+        stmt->setUInt32(6, delay); // Add delay
 
         WorldDatabase.Execute(stmt);
 

@@ -750,7 +750,7 @@ class spell_sha_elemental_blast : public SpellScriptLoader
                         for (int i = 0; i < 4; ++i)
                         {
                             if (i == randomEffect)
-                                aura->GetEffect(i)->ChangeAmount(3500);
+                                aura->GetEffect(i)->ChangeAmount(100);
                             else
                             {
                                 aura->GetEffect(i)->ChangeAmount(0);

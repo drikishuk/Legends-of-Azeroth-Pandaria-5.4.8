@@ -25607,7 +25607,8 @@ void Player::LearnDefaultSkill(SkillRaceClassInfoEntry const* entry)
 }
 
 void Player::LearnSpecializationSpells()
-{
+{   
+    uint32 spec = GetTalentSpecialization();
     auto spells = dbc::GetSpecializetionSpells(GetTalentSpecialization());
     if (!spells)
         return;
@@ -25624,6 +25625,9 @@ void Player::LearnSpecializationSpells()
 
         LearnSpell(spellInfo->Id, true);
     }
+
+    //BENDEV: Activate player spec for nerf scripts
+    sScriptMgr->OnPlayerActivateSpec(this, spec);
 }
 
 void Player::learnQuestRewardedSpells(Quest const* quest)
@@ -27305,15 +27309,15 @@ void Player::InitGlyphsForLevel()
 
     uint8 level = GetLevel();
     uint32 slotMask = 0;
-
-    if (level >= 25)
+    // BENDEV: Changed levels here from 25 50 75
+    if (level >= 8)
         slotMask |= 0x01 | 0x02;
-    if (level >= 50)
+    if (level >= 14)
         slotMask |= 0x04 | 0x08;
-    if (level >= 75)
+    if (level >= 20)
         slotMask |= 0x10 | 0x20;
 
-    if (level >= 25)
+    if (level >= 8)
         SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_ENABLED, slotMask);
 }
 
@@ -27723,7 +27727,23 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, Object* src, AELootResult
 uint32 Player::CalculateTalentsPoints() const
 {
     // 1 talent point for every 15 levels
-    return uint32(floor(GetLevel() / 15.f));
+    // return uint32(floor(GetLevel() / 15.f));
+
+    // BENDEV: New Talent Points system
+    // No talent points before level 5
+    if (GetLevel() < 5)
+    {
+        return 0;
+    }
+
+    // Cap talent points at 6 if level is 20 or above
+    if (GetLevel() >= 20)
+    {
+        return 6;
+    }
+
+    // Calculate talent points starting from level 5
+    return uint32(floor((GetLevel() - 5) / 3.f)) + 1;
 }
 
 bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const

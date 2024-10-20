@@ -2126,7 +2126,9 @@ void AddBattlegroundScripts()
 
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
-
+void AddSC_Player_Scripts();
+void AddSC_custom_player_npcs();
+void AddSC_nightfall_scripts();
 #endif
 void AddSC_npc_teleport();
 void AddSC_wow_token();
@@ -2134,6 +2136,7 @@ void AddSC_custom_reward();
 void AddSC_boost_profession();
 void AddSC_custom_items();
 void AddSC_solocraft_system();
+
 
 void AddCustomScripts()
 {
@@ -2145,6 +2148,9 @@ void AddCustomScripts()
 //AddSC_boost_profession();
 //AddSC_custom_items();
 	AddSC_solocraft_system();
+    AddSC_Player_Scripts();
+    AddSC_custom_player_npcs();
+    AddSC_nightfall_scripts();
 
 #endif
     AddSC_Anticheat();

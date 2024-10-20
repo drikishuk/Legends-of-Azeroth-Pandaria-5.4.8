@@ -4895,15 +4895,15 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
     {
         case 0:
         case 1:
-            minLevel = 25;
+            minLevel = 8;
             break;
         case 2:
         case 3:
-            minLevel = 50;
+            minLevel = 14;
             break;
         case 4:
         case 5:
-            minLevel = 75;
+            minLevel = 20;
             break;
     }
 
