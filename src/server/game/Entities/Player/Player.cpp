@@ -6033,6 +6033,7 @@ bool Player::UpdateGatherSkill(uint32 skillId, uint32 skillValue, uint32 redLeve
     {
         case SKILL_HERBALISM:
         case SKILL_MINING:
+        case SKILL_WOODCUTTING:
         {
             uint32 gray = redLevel + 100;
             uint32 green = redLevel + 50;

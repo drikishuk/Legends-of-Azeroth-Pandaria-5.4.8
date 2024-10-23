@@ -3221,7 +3221,8 @@ enum LockType
     LOCKTYPE_INSCRIPTION           = 20,
     LOCKTYPE_OPEN_FROM_VEHICLE     = 21,
     LOCKTYPE_ARCHAEOLOGY           = 22,
-    LOCKTYPE_PVP_QUICK_OPEN        = 23
+    LOCKTYPE_PVP_QUICK_OPEN        = 23,
+    LOCKTYPE_WOODCUTTING = 24
 };
 
 enum TrainerType                                            // this is important type for npcs!
@@ -3740,9 +3741,10 @@ enum SkillType
     SKILL_WAY_OF_THE_STEAMER       = 978,
     SKILL_WAY_OF_THE_OVEN          = 979,
     SKILL_WAY_OF_THE_BREW          = 980,
+    SKILL_WOODCUTTING = 1306
 };
 
-#define MAX_SKILL_TYPE               908
+#define MAX_SKILL_TYPE               1310
 
 inline SkillType SkillByLockType(LockType locktype)
 {
@@ -3754,6 +3756,7 @@ inline SkillType SkillByLockType(LockType locktype)
         case LOCKTYPE_FISHING:     return SKILL_FISHING;
         case LOCKTYPE_INSCRIPTION: return SKILL_INSCRIPTION;
         case LOCKTYPE_ARCHAEOLOGY: return SKILL_ARCHAEOLOGY;
+        case LOCKTYPE_WOODCUTTING: return SKILL_WOODCUTTING;
         default: break;
     }
     return SKILL_NONE;
