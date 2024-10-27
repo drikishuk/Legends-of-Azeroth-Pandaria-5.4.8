@@ -3,7 +3,9 @@
 #include "GossipDef.h"
 #include "QuestDef.h"
 #include "Creature.h"
-
+#include "Unit.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "ScriptedGossip.h"
 
 #include "GameObjectAI.h"
@@ -92,7 +94,8 @@ public:
                 player->PlayerTalkClass->ClearMenus();
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Everything will be ok, help will be here soon.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<Hand over the questionable food scraps>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<Ben Test>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<Enable Deep Sea Walking>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<Remove Deep Sea Walking>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
             }
             
             player->SEND_GOSSIP_MENU(900002, me->GetGUID());
@@ -133,23 +136,14 @@ public:
 
             if (action == GOSSIP_ACTION_INFO_DEF + 3)
             {
-                float velocityXY = 250;  // Adjust these values to set the direction and force
-                float velocityY = 0.0f;
-                float velocityZ = 80;  // Vertical velocity, will launch them upward
+                player->RemoveUnitFlag(UNIT_FLAG_CAN_SWIM);
+                player->SetUnitFlag(UNIT_FLAG_CANNOT_SWIM);
+            }
 
-                float destinationX = 9968.778f;
-                float destinationY = 9762.148f;
-                float destinationZ = -1.0f;
-
-                //player->KnockbackFrom(player->GetPositionX(), player->GetPositionY(), velocityXY, velocityZ);
-                player->SetEmoteState(EMOTE_ONESHOT_ROAR);
-                player->CastSpell(player, 126689); //Explosion
-                player->CastSpell(player, 123855); // Fire (26 sec dur)
-                player->CastSpell(player, 117326, true); // Roll spell
-                player->CastSpell(player, 47533, true); // Camera Shake
-                player->GetMotionMaster()->MoveJump(destinationX, destinationY, destinationZ, velocityXY, velocityZ);
-                player->PlayDirectSound(32953); // Wind rushing
-
+            if (action == GOSSIP_ACTION_INFO_DEF + 4)
+            {
+                player->SetUnitFlag(UNIT_FLAG_CAN_SWIM);
+                player->RemoveUnitFlag(UNIT_FLAG_CANNOT_SWIM);
             }
 
             CloseGossipMenuFor(player); // Close the gossip window after the action is processed
@@ -165,6 +159,43 @@ public:
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_shipwrecked_crewmanAI(creature);
+    }
+};
+
+
+// 115610 - Temporal Shield
+class spell_mage_temporal_shield : public AuraScript
+{
+    PrepareAuraScript(spell_mage_temporal_shield);
+
+    uint32 damageTaken = 0;
+
+    void HandleProc(ProcEventInfo& eventInfo)
+    {
+        if (uint32 damage = eventInfo.GetDamageInfo()->GetDamage())
+            if (!GetUnitOwner()->IsFriendlyTo(eventInfo.GetActor()))
+                damageTaken += damage;
+    }
+
+    void HandleRemove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (damageTaken)
+        {
+            Unit* mage = GetUnitOwner();
+
+            int32 heal = CalculatePct(damageTaken, GetSpellInfo()->Effects[EFFECT_0].CalcValue(mage));
+            heal *= mage->GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_PCT);
+            if (mage->GetMap()->IsBattlegroundOrArena() && !mage->HasAura(134735))
+                AddPct(heal, -sWorld->getFloatConfig(CONFIG_BATTLE_FATIGUE));
+
+            mage->CastCustomSpell(45, SPELLVALUE_BASE_POINT0, heal / 3, mage, true);
+        }
+    }
+
+    void Register() override
+    {
+        OnProc += AuraProcFn(spell_mage_temporal_shield::HandleProc);
+        OnEffectRemove += AuraEffectRemoveFn(spell_mage_temporal_shield::HandleRemove, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -255,7 +286,7 @@ public:
         bool OnGossipHello(Player* player) override
         {
             player->PlayerTalkClass->ClearMenus();
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<Retrieve the soldiers dog tag>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Test Walking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
             player->SEND_GOSSIP_MENU(900001, me->GetGUID());
 
@@ -358,6 +389,7 @@ public:
     }
 
 };
+
 
 
 

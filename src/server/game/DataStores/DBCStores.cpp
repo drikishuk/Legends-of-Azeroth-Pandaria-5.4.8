@@ -768,8 +768,9 @@ void LoadDBCStores(const std::string& dataPath, uint32& availableDbcLocales)
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiNodesStore,              dbcPath, "TaxiNodes.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiPathStore,               dbcPath, "TaxiPath.dbc");//15595
     for (uint32 i = 1; i < sTaxiPathStore.GetNumRows(); ++i)
-        if (TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
+        if (TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i)) {
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID, entry->price);
+        }
     uint32 pathCount = sTaxiPathStore.GetNumRows();
 
     //## TaxiPathNode.dbc ## Loaded only for initialization different structures
@@ -803,7 +804,7 @@ void LoadDBCStores(const std::string& dataPath, uint32& availableDbcLocales)
 
         memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));
         memset(sOldContinentsNodesMask, 0, sizeof(sOldContinentsNodesMask));
-        memset(sHordeTaxiNodesMask, 0, sizeof(sHordeTaxiNodesMask));
+        memset(sHordeTaxiNodesMask, 0, sizeof(sHordeTaxiNodesMask));    
         memset(sAllianceTaxiNodesMask, 0, sizeof(sAllianceTaxiNodesMask));
         memset(sDeathKnightTaxiNodesMask, 0, sizeof(sDeathKnightTaxiNodesMask));
         for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
@@ -849,6 +850,8 @@ void LoadDBCStores(const std::string& dataPath, uint32& availableDbcLocales)
             // fix DK node at Ebon Hold and Shadow Vault flight master
             if (i == 315 || i == 333)
                 ((TaxiNodesEntry*)node)->MountCreatureID[1] = 32981;
+
+            //TC_LOG_ERROR("info", "VALID: (%u).", node->ID);
         }
     }
 
